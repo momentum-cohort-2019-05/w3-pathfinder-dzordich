@@ -1,6 +1,7 @@
 from pathClasses import Point
 from PIL import Image, ImageDraw
 import re
+from random import randint
 
 # open file and store data in lines
 file = open("elevation_small.txt")
@@ -50,7 +51,7 @@ rows = len(nest)
 columns = len(nest[0])
 
 img = Image.new('RGBA', (rows, columns), 'white')
-img.save("elevation_map2.png")
+img.save("elevation_map_small.png")
 
 
 # finds the lowest and highest elevation in the field
@@ -74,18 +75,26 @@ def pathfinder(start_pt):
     y = start_pt
     current_elevation = nest[start_pt][0]
     while x < (columns - 2):
+        # automatically goes straight forward if neither up-forward or down-forward has less change
         best_choice = (x, y)
+        best_y = y 
         
+        # checks if up-forward has less change than forward
         if abs((nest[y - 1][x] - current_elevation)) < abs(nest[y][x] - current_elevation):
-            best_choice = (x, y - 1)
-            current_elevation = nest[y - 1][x]
-            y = y - 1
-        elif y < (columns - 1) and abs(nest[y + 1][x] - current_elevation) < abs(nest[y][x] - current_elevation):
+            # even if up-forward is less than forward, down-forward may still have less change
+            if y < (rows - 1) and abs(nest[y - 1][x] - current_elevation) > abs(nest[y + 1][x] - current_elevation):
+                best_choice = (x, y + 1)
+                best_y = y + 1
+            else:
+                best_choice = (x, y - 1)
+                best_y = y - 1
+        # if forward-up has greater or equal elevation change than forward, forward-down may have less change than forward
+        elif y < (rows - 1) and abs(nest[y + 1][x] - current_elevation) < abs(nest[y][x] - current_elevation):
             best_choice = (x, y + 1)
-            current_elevation = nest[y + 1][x]
-            y = y + 1
-        else:
-            current_elevation = nest[y][x]
+            best_y = y + 1
+        #sets the current elevation to the elevation at the point pathfinder chooses to move to
+        current_elevation = nest[best_y][x]
+        y = best_y
         points_in_path.append(best_choice)
         print(best_choice)
         x += 1
@@ -109,11 +118,11 @@ for x in range(rows):
     for y in range(columns):
         print(f"{x}/{rows - 1}")
         img.putpixel((x, y), (30, 132, 73, (int((nest[y][x] - min_elevation) / (max_elevation - min_elevation) * 255))))
-img.save("elevation_map2.png")
+img.save("elevation_map_small.png")
 
 
 draw = ImageDraw.Draw(img)
 for x in range(columns - 1):
     draw.line(pathfinder(x), fill=(243, 156, 18))
 
-img.save("elevation_map_w_paths2.png")
+img.save("elevation_small_paths.png")
