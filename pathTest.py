@@ -3,7 +3,7 @@ from PIL import Image
 import re
 
 # open file and store data in lines
-file = open("elevation_large-.txt")
+file = open("elevation_small.txt")
 lines = file.readlines()
 file.close()
 nest = []
@@ -13,10 +13,8 @@ for l in lines:
     clean_line = l[0:(len(l)-1)]
     aline = clean_line.split(" ")
     anotherline = []
-    if aline != []:
-        for i in aline:
-            if i != "":
-                anotherline.append(int(i))
+    for i in aline:
+        anotherline.append(int(i))
     nest.append(anotherline)
     
 
@@ -90,7 +88,7 @@ def pathfinder(start_pt):
 #         self.total_change = total_change
 
 #     def get_total_change(self):
-#         change = 
+#         change = 0
 #         index = 0
 #         for i in list_indexes:
             
@@ -103,3 +101,6 @@ for x in range(rows):
         print(f"{x}, {y}")
         img.putpixel((x, y), (30, 132, 73, (int((nest[y][x] - min_elevation) / (max_elevation - min_elevation) * 255))))
 img.save("elevation_map2.png")
+
+
+
