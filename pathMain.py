@@ -72,14 +72,20 @@ def pathfinder(start_pt):
     x = 1
     points_in_path = [(0, start_pt)]
     y = start_pt
+    current_elevation = nest[start_pt][0]
     while x < (columns - 2):
         best_choice = (x, y)
-        if y > 0 and y < columns and x > 0 and x < rows and nest[y - 1][x] < nest[y][x]:
+        
+        if abs((nest[y - 1][x] - current_elevation)) < abs(nest[y][x] - current_elevation):
             best_choice = (x, y - 1)
+            current_elevation = nest[y - 1][x]
             y = y - 1
-        elif y > 0 and y < (columns - 1) and x > 0 and x < (rows - 1) and nest[y + 1][x] < nest[y][x]:
+        elif y < (columns - 1) and abs(nest[y + 1][x] - current_elevation) < abs(nest[y][x] - current_elevation):
             best_choice = (x, y + 1)
+            current_elevation = nest[y + 1][x]
             y = y + 1
+        else:
+            current_elevation = nest[y][x]
         points_in_path.append(best_choice)
         print(best_choice)
         x += 1
