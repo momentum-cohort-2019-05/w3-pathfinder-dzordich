@@ -1,9 +1,9 @@
 from pathClasses import Point
-from PIL import Image
+from PIL import Image, ImageDraw
 import re
 
 # open file and store data in lines
-file = open("elevation_large-.txt")
+file = open("elevation_small.txt")
 lines = file.readlines()
 file.close()
 nest = []
@@ -69,18 +69,19 @@ def pathfinder(start_pt):
     """takes a starting y value.
     from there, finds the lowest elevation out of (x+1, y-1), (x+1, y), and (x+1, y+1).
     steps to that point and repeats the process"""
-    x = 0
+    x = 1
     points_in_path = [(0, start_pt)]
     y = start_pt
-    while x < columns:
-        best_choice = (x + 1, y)
-        if from_index_get_val((x + 1, y - 1)) < from_index_get_val(best_choice):
-            best_choice = (x +1, y - 1)
+    while x < (columns - 2):
+        best_choice = (x, y)
+        if y > 0 and y < columns and x > 0 and x < rows and nest[y - 1][x] < nest[y][x]:
+            best_choice = (x, y - 1)
             y = y - 1
-        elif from_index_get_val((x + 1, y + 1)) < from_index_get_val(best_choice):
-            best_choice = (x + 1, y + 1)
+        elif y > 0 and y < (columns - 1) and x > 0 and x < (rows - 1) and nest[y + 1][x] < nest[y][x]:
+            best_choice = (x, y + 1)
             y = y + 1
         points_in_path.append(best_choice)
+        print(best_choice)
         x += 1
     return points_in_path
 
@@ -100,6 +101,13 @@ def pathfinder(start_pt):
 
 for x in range(rows):
     for y in range(columns):
-        print(f"{x}, {y}")
+        print(f"{x}/{rows - 1}")
         img.putpixel((x, y), (30, 132, 73, (int((nest[y][x] - min_elevation) / (max_elevation - min_elevation) * 255))))
 img.save("elevation_map2.png")
+
+
+draw = ImageDraw.Draw(img)
+for x in range(columns - 1):
+    draw.line(pathfinder(x), fill=(243, 156, 18))
+
+img.save("elevation_map_w_paths2.png")
