@@ -138,7 +138,7 @@ def path_least_change():
 for x in range(columns - 1):
     print(f"Drawing map... {int((x / columns) * 100)}% complete")
     for y in range(rows - 1):
-        img.putpixel((x, y), (88, 214, 141, (int((nest[y][x] - min_elevation) / (max_elevation - min_elevation) * 255))))
+        img.putpixel((x, y), ((int((nest[y][x] - min_elevation) / (max_elevation - min_elevation) * 255)), (int((nest[y][x] - min_elevation) / (max_elevation - min_elevation) * 255)), 255))
 img.save("elevation_map.png")
 
 
