@@ -8,6 +8,7 @@ file = open("elevation_small.txt")
 lines = file.readlines()
 file.close()
 nest = []
+paths = []
 
 # creates a nice list of lists of the individual data points in each line, and removes newlines whilst doing so.
 for l in lines:
@@ -50,7 +51,7 @@ data = init_data(nest)
 rows = len(nest)
 columns = len(nest[0])
 
-img = Image.new('RGBA', (rows, columns), 'white')
+img = Image.new('RGBA', (rows, columns), (0, 77, 64))
 img.save("elevation_map_small.png")
 
 
@@ -71,8 +72,10 @@ def pathfinder(start_pt):
     from there, finds the lowest elevation out of (x+1, y-1), (x+1, y), and (x+1, y+1).
     steps to that point and repeats the process"""
     x = 1
-    points_in_path = [(0, start_pt)]
     y = start_pt
+    points_in_path = [(0, start_pt)]
+    path_and_change = []
+    total_change = 0
     current_elevation = nest[start_pt][0]
     while x < (columns - 2):
         # automatically goes straight forward if neither up-forward or down-forward has less change
@@ -93,36 +96,39 @@ def pathfinder(start_pt):
             best_choice = (x, y + 1)
             best_y = y + 1
         #sets the current elevation to the elevation at the point pathfinder chooses to move to
+        total_change += abs(nest[best_y][x] - current_elevation)
         current_elevation = nest[best_y][x]
         y = best_y
         points_in_path.append(best_choice)
         print(best_choice)
         x += 1
+
+    path_and_change.append(points_in_path)
+    path_and_change.append(total_change)
+    # stores each path with its total elevation change in paths
+    paths.append(path_and_change)
     return points_in_path
 
-# class Path:
-#     def __init__(self, list_indexes, total_change):
-#         self.list_indexes = list_indexes
-#         self.total_change = total_change
+# returns the path with the least elevation change
+def path_least_change():
+    best_path = paths[0]
+    for path in paths:
+        if path[1] < best_path[1]:
+            best_path = path
+    return best_path[0]
 
-#     def get_total_change(self):
-#         change = 
-#         index = 0
-#         for i in list_indexes:
-            
-
-# apath = Path(pathfinder(start_pt), <elevation_change_for_path>
 
 
 for x in range(rows):
     for y in range(columns):
         print(f"{x}/{rows - 1}")
-        img.putpixel((x, y), (30, 132, 73, (int((nest[y][x] - min_elevation) / (max_elevation - min_elevation) * 255))))
+        img.putpixel((x, y), (88, 214, 141, (int((nest[y][x] - min_elevation) / (max_elevation - min_elevation) * 255))))
 img.save("elevation_map_small.png")
 
 
 draw = ImageDraw.Draw(img)
 for x in range(columns - 1):
     draw.line(pathfinder(x), fill=(243, 156, 18))
-
+draw.line(path_least_change(), fill=(244, 67, 54), width=2)
+print(paths)
 img.save("elevation_small_paths.png")
