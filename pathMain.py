@@ -1,25 +1,42 @@
 from pathClasses import Point
 from PIL import Image, ImageDraw
-import re
 from random import randint
+import argparse
+from pathlib import Path
 
+parser = argparse.ArgumentParser()
+parser.add_argument("file", help="path for the file of elevation data")
+args = parser.parse_args()
+    
 # open file and store data in lines
-file = open("elevation_small.txt")
+try:
+    f = open(Path(args.file))
+    f.close()
+except FileNotFoundError:
+    print("File does not exist!")
+    exit()
+
+file = open(Path(args.file))
 lines = file.readlines()
 file.close()
+
+
 nest = []
 paths = []
 
 # creates a nice list of lists of the individual data points in each line, and removes newlines whilst doing so.
+print("Initializing data.")
 for l in lines:
-    clean_line = l[0:(len(l)-1)]
-    aline = clean_line.split(" ")
-    anotherline = []
-    if aline != []:
-        for i in aline:
-            if i != "":
-                anotherline.append(int(i))
-    nest.append(anotherline)
+    if not l[0].isalpha():
+        clean_line = l[0:(len(l)-1)]
+        aline = clean_line.split(" ")
+        anotherline = []
+        if aline != []:
+            for i in aline:
+                if i != "":
+                    anotherline.append(int(i))
+        if anotherline != []:
+            nest.append(anotherline)
     
 
 
@@ -51,8 +68,8 @@ data = init_data(nest)
 rows = len(nest)
 columns = len(nest[0])
 
-img = Image.new('RGBA', (rows, columns), (0, 77, 64))
-img.save("elevation_map_small.png")
+img = Image.new('RGBA', (columns, rows), (0, 77, 64))
+img.save("elevation_map.png")
 
 
 # finds the lowest and highest elevation in the field
@@ -100,7 +117,6 @@ def pathfinder(start_pt):
         current_elevation = nest[best_y][x]
         y = best_y
         points_in_path.append(best_choice)
-        print(best_choice)
         x += 1
 
     path_and_change.append(points_in_path)
@@ -119,16 +135,21 @@ def path_least_change():
 
 
 
-for x in range(rows):
-    for y in range(columns):
-        print(f"{x}/{rows - 1}")
+for x in range(columns - 1):
+    print(f"Drawing map... {int((x / columns) * 100)}% complete")
+    for y in range(rows - 1):
         img.putpixel((x, y), (88, 214, 141, (int((nest[y][x] - min_elevation) / (max_elevation - min_elevation) * 255))))
-img.save("elevation_map_small.png")
+img.save("elevation_map.png")
 
 
 draw = ImageDraw.Draw(img)
-for x in range(columns - 1):
+for x in range(rows - 1):
     draw.line(pathfinder(x), fill=(243, 156, 18))
+    print(f"Drawing path {x}/{rows - 2}")
 draw.line(path_least_change(), fill=(244, 67, 54), width=2)
-print(paths)
-img.save("elevation_small_paths.png")
+print("Done.")
+print(" ")
+print("Map saved at elevation_map_paths.png")
+
+img.save("elevation_map_paths.png")
+
